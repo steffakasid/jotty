@@ -1,0 +1,36 @@
+= JOTTY - JWT Decoder
+
+This tool allows to decrypt link:https://jwt.io/[JSON Web Tokens] called JWT (pronounced as `jot`). It just decodes the token and prints the JSON contents.
+
+[quote, https://datatracker.ietf.org/doc/html/rfc7519#section-1]
+The suggested pronunciation of JWT is the same as the English word "jot".
+
+== Usage
+
+jotty [flags] <jwt-data>
+
+or reading data from pipe
+
+some-other-tool | jotty -f -
+
+== Examples
+
+  pbpaste | jotty -f -
+  jotty -f test/jwt.txt
+  jotty <jwt token data>
+  pbpaste | jotty -f - --header=false --signature=false
+
+.Sample JWt from https://jwt.io
+[source,txt]
+----
+include::test/jwt.txt[]
+----
+
+== Flags
+
+`-f, --file string`::   --file=<filename> read token from file or - from stdin
+`-h, --header`::        --header=false don't print the header of the JWT (default true)
+`-?, --help`::          --help print usage information
+`-p, --payload`::       --payload=false don't print the payload of the JWT (default true)
+`-s, --signature`::     --signature=false don't print the signature of the JWT (default true)
+`-v, --version`::       --version print version information
