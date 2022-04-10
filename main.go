@@ -10,7 +10,7 @@ import (
 	logger "github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"github.com/steffakasid/jotty/pkg"
+	"github.com/steffakasid/jotty/internal"
 )
 
 const version = "0.1-development"
@@ -74,7 +74,7 @@ func main() {
 	} else {
 		var jwt string
 		if len(conf.File) > 0 {
-			jwtBt, err := pkg.ReadData(conf.File)
+			jwtBt, err := internal.ReadData(conf.File)
 			CheckError(err, logger.Fatalf)
 			jwt = string(jwtBt)
 		} else {
@@ -86,7 +86,7 @@ func main() {
 			}
 		}
 
-		decodedJwt := pkg.JWT{}
+		decodedJwt := internal.JWT{}
 		err := decodedJwt.Decode(jwt)
 		CheckError(err, logger.Fatalf)
 
