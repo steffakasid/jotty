@@ -1,5 +1,10 @@
 = JOTTY - JWT Decoder
 
+image:https://img.shields.io/badge/License-Apache%202.0-blue.svg[link="http://www.apache.org/licenses/LICENSE-2.0"]
+image:https://github.com/steffakasid/jotty/actions/workflows/codeql-analysis.yml/badge.svg[link:https://github.com/steffakasid/jotty/actions/workflows/codeql-analysis.yml]
+image:https://github.com/steffakasid/jotty/actions/workflows/release.yml/badge.svg[link:https://github.com/steffakasid/jotty/actions/workflows/release.yml]
+image:https://github.com/steffakasid/jotty/actions/workflows/go-test.yml/badge.svg[link:https://github.com/steffakasid/jotty/actions/workflows/go-test.yml]
+
 This tool allows to decrypt link:https://jwt.io/[JSON Web Tokens] called JWT (pronounced as `jot`). It just decodes the token and prints the JSON contents.
 
 [quote, https://datatracker.ietf.org/doc/html/rfc7519#section-1]
