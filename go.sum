@@ -162,6 +162,8 @@ github.com/neilotoole/jsoncolor v0.6.0 h1:9KQGdK4gZQjr+KbSdUTtK6fqE6XhbYyyUsCkvJ
 github.com/neilotoole/jsoncolor v0.6.0/go.mod h1:4G3vc1QiYm0ttlhxSnMSjppEpEuPiYT8/e9kU2lSDK4=
 github.com/neilotoole/jsoncolor v0.7.0 h1:E/TkyQRo0BoFA3gkNlXvGLCz74Rj7258glCWtSRbKUI=
 github.com/neilotoole/jsoncolor v0.7.0/go.mod h1:OPC90Fgn8iMO9P46SiloXy20+RMtzxx0C/817EYGHZk=
+github.com/neilotoole/jsoncolor v0.7.1 h1:/MoU7KPLcto+ykcy592Y8eX9WFQhoi3IBEbwrP89dgs=
+github.com/neilotoole/jsoncolor v0.7.1/go.mod h1:KZ9hUYN5xMrvyhqlFQ3QTmu11OcoqFgSnWAcYkN6abg=
 github.com/nwidger/jsoncolor v0.3.0 h1:VdTH8Dc0SJoq4pJ8pRxxFZW0/5Ng5akbN4YToCBJDSU=
 github.com/nwidger/jsoncolor v0.3.0/go.mod h1:Cs34umxLbJvgBMnVNVqhji9BhoT/N/KinHqZptQ7cf4=
 github.com/nwidger/jsoncolor v0.3.2/go.mod h1:Cs34umxLbJvgBMnVNVqhji9BhoT/N/KinHqZptQ7cf4=
@@ -386,6 +388,8 @@ golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9sn
 golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b/go.mod h1:jbD1KX2456YbFQfuXm/mYQcufACuNUgVhRMnK/tPxf8=
 golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 h1:CBpWXWQpIRjzmkkA+M7q9Fqnwd2mZr3AFqexg8YTfoM=
 golang.org/x/term v0.0.0-20220526004731-065cf7ba2467/go.mod h1:jbD1KX2456YbFQfuXm/mYQcufACuNUgVhRMnK/tPxf8=
+golang.org/x/term v0.14.0 h1:LGK9IlZ8T9jvdy6cTdfKUCltatMFOehAQo9SRC46UQ8=
+golang.org/x/term v0.14.0/go.mod h1:TySc+nGkYR6qt8km8wUhuFRTVSMIX3XPR58y2lC8vww=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
