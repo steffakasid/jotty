@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/mattn/go-colorable"
 	json "github.com/neilotoole/jsoncolor"
 	flag "github.com/spf13/pflag"
@@ -28,6 +29,8 @@ type config struct {
 var conf = &config{}
 
 func init() {
+	eslog.Logger.SetOutput(os.Stderr)
+
 	flag.StringP("file", "f", "", "--file=<filename> read token from file or - from stdin")
 	flag.BoolP("header", "h", true, "--header=false don't print the header of the JWT")
 	flag.BoolP("payload", "p", true, "--payload=false don't print the payload of the JWT")
@@ -70,34 +73,43 @@ func main() {
 	} else if conf.Help {
 		flag.Usage()
 	} else {
-		var jwt string
+		var jwtRaw string
 		if len(conf.File) > 0 {
 			jwtBt, err := internal.ReadData(conf.File)
 			eslog.LogIfError(err, eslog.Error)
-			jwt = string(jwtBt)
+			jwtRaw = string(jwtBt)
 		} else {
 			parsedArgs := parseArgs()
 			if len(parsedArgs) == 1 {
-				jwt = parsedArgs[0]
+				jwtRaw = parsedArgs[0]
 			} else {
 				eslog.Fatal("Only one argument is supported! Got", len(parsedArgs), parsedArgs)
 			}
 		}
 
-		decodedJwt := internal.JWT{}
-		err := decodedJwt.Decode(jwt)
-		CheckError(err, logger.Fatalf)
+		decodedJWT, err := jwt.Parse(jwtRaw, func(token *jwt.Token) (interface{}, error) {
+			return []byte("AllYourBase"), nil
+		})
+		switch {
+		case decodedJWT == nil:
+			eslog.Fatal("Couldn't handle this token:", err)
+		case decodedJWT.Valid:
+			fmt.Println("JWT token is valid")
+		default:
+			eslog.Error("Error parsing the JWT:", err)
+		}
 
 		if conf.Header {
-			colorfulJsonEncode(decodedJwt.Header)
+			colorfulJsonEncode(decodedJWT.Header)
 		}
 
 		if conf.Payload {
-			colorfulJsonEncode(decodedJwt.Payload)
+			colorfulJsonEncode(decodedJWT.Claims)
 		}
 
 		if conf.Signature {
-			fmt.Println(decodedJwt.Signature)
+			fmt.Println("JWT Signature:")
+			fmt.Println(decodedJWT.Signature)
 		}
 	}
 }
@@ -111,7 +123,7 @@ func CheckError(err error, loggerFunc func(format string, args ...interface{})) 
 	return wasError
 }
 
-func colorfulJsonEncode(data map[string]interface{}) {
+func colorfulJsonEncode(data any) {
 	var enc *json.Encoder
 
 	if json.IsColorTerminal(os.Stdout) {
@@ -126,7 +138,7 @@ func colorfulJsonEncode(data map[string]interface{}) {
 	enc.SetIndent("", "  ")
 
 	if err := enc.Encode(data); err != nil {
-		CheckError(err, logger.Fatalf)
+		eslog.Error(err)
 	}
 }
 

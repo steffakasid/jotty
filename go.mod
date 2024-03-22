@@ -1,8 +1,11 @@
 module github.com/steffakasid/jotty
 
-go 1.19
+go 1.22.0
+
+toolchain go1.22.1
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/mattn/go-colorable v0.1.13
 	github.com/neilotoole/jsoncolor v0.7.1
 	github.com/sirupsen/logrus v1.9.3
@@ -24,11 +27,9 @@ require (
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
-	github.com/segmentio/encoding v0.3.6 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
-	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
