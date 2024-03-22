@@ -7,9 +7,9 @@ import (
 
 	"github.com/mattn/go-colorable"
 	json "github.com/neilotoole/jsoncolor"
-	logger "github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/steffakasid/eslog"
 	"github.com/steffakasid/jotty/internal"
 )
 
@@ -59,11 +59,9 @@ Flags:`)
 
 	flag.Parse()
 	err := viper.BindPFlags(flag.CommandLine)
-	CheckError(err, logger.Fatalf)
+	eslog.LogIfError(err, eslog.Fatal)
 	err = viper.UnmarshalExact(conf)
-	CheckError(err, logger.Fatalf)
-
-	logger.SetLevel(logger.DebugLevel)
+	eslog.LogIfError(err, eslog.Fatal)
 }
 
 func main() {
@@ -75,14 +73,14 @@ func main() {
 		var jwt string
 		if len(conf.File) > 0 {
 			jwtBt, err := internal.ReadData(conf.File)
-			CheckError(err, logger.Fatalf)
+			eslog.LogIfError(err, eslog.Error)
 			jwt = string(jwtBt)
 		} else {
 			parsedArgs := parseArgs()
 			if len(parsedArgs) == 1 {
 				jwt = parsedArgs[0]
 			} else {
-				logger.Fatal("Only one argument is supported! Got", len(parsedArgs), parsedArgs)
+				eslog.Fatal("Only one argument is supported! Got", len(parsedArgs), parsedArgs)
 			}
 		}
 
