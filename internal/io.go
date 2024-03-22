@@ -3,7 +3,6 @@ package internal
 import (
 	"bufio"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -11,7 +10,7 @@ func ReadData(file string) (data []byte, err error) {
 	if file == "-" {
 		return ReadPipedData()
 	} else {
-		return ioutil.ReadFile(file)
+		return os.ReadFile(file)
 	}
 }
 
