@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mattn/go-colorable"
@@ -17,13 +18,23 @@ import (
 const version = "0.1-development"
 
 type config struct {
-	File      string
-	Header    bool
-	Payload   bool
-	Signature bool
-	Version   bool
-	Help      bool
-	Loglevel  string
+	File                   string
+	Header                 bool
+	Payload                bool
+	Signature              bool
+	Version                bool
+	Help                   bool
+	Loglevel               string
+	WithAudience           string        `mapstructure:"with-audience"`
+	WithExpirationRequired bool          `mapstructure:"with-expiration"`
+	WithIssuedAt           bool          `mapstructure:"with-issued-at"`
+	WithIssuer             string        `mapstructure:"with-issuer"`
+	WithJsonNumber         bool          `mapstructure:"with-json-number"`
+	WithLeeway             time.Duration `mapstructure:"with-leeway"`
+	WithPaddingAllowed     bool          `mapstructure:"with-padding-allowed"`
+	WithStrictDecoding     bool          `mapstructure:"with-strict-decodinf"`
+	WithSubject            string        `mapstructure:"with-subject"`
+	WithValidMethods       []string      `mapstructure:"with-valid-methods"`
 }
 
 var conf = &config{}
@@ -37,6 +48,17 @@ func init() {
 	flag.BoolP("signature", "s", true, "--signature=false don't print the signature of the JWT")
 	flag.BoolP("version", "v", false, "--version print version information")
 	flag.BoolP("help", "?", false, "--help print usage information")
+
+	flag.String("with-audience", "", "Configures the validator to require the specified audience in the `aud` claim.")
+	flag.Bool("with-expiration", false, "This makes the exp claim required. By default exp claim is optional.")
+	flag.Bool("with-issued-at", false, "Enables verification of issued-at.")
+	flag.String("with-issuer", "", "Require the specified issuer in the `iss` claim. Validation will fail if a different issuer is specified")
+	flag.Bool("with-json-number", false, "Configures the underlying JSON parser with UseNumber.")
+	flag.Duration("with-leeway", 0, "Specify the leeway window as duration e.g. 5s.")
+	flag.Bool("with-padding-allowed", false, "Enable the codec used for decoding JWTs to allow padding. Note that the JWS RFC7515 states that the tokens will utilize a Base64url encoding with no padding.")
+	flag.Bool("with-strict-decodinf", false, "Switch the codec used for decoding JWTs into strict mode. In this mode, the decoder requires that trailing padding bits are zero, as described in RFC 4648 section 3.5.")
+	flag.String("with-subject", "", "Configures the validator to require the specified subject in the `sub` claim.")
+	flag.StringArray("with-valid-methods", []string{}, "Supply algorithm methods that the parser will check.")
 
 	flag.Usage = func() {
 		w := os.Stderr
@@ -73,6 +95,7 @@ func main() {
 	} else if conf.Help {
 		flag.Usage()
 	} else {
+		// TODO: do all this in a own file
 		var jwtRaw string
 		if len(conf.File) > 0 {
 			jwtBt, err := internal.ReadData(conf.File)
@@ -87,9 +110,44 @@ func main() {
 			}
 		}
 
+		opts := []jwt.ParserOption{}
+
+		if conf.WithAudience != "" {
+			opts = append(opts, jwt.WithAudience(conf.WithAudience))
+		}
+		if conf.WithExpirationRequired {
+			opts = append(opts, jwt.WithExpirationRequired())
+		}
+		if conf.WithIssuedAt {
+			opts = append(opts, jwt.WithIssuedAt())
+		}
+		if conf.WithIssuer != "" {
+			opts = append(opts, jwt.WithIssuer(conf.WithIssuer))
+		}
+		if conf.WithJsonNumber {
+			opts = append(opts, jwt.WithJSONNumber())
+		}
+		if conf.WithLeeway > 0 {
+			opts = append(opts, jwt.WithLeeway(conf.WithLeeway))
+		}
+		if conf.WithPaddingAllowed {
+			opts = append(opts, jwt.WithPaddingAllowed())
+		}
+		if conf.WithStrictDecoding {
+			opts = append(opts, jwt.WithStrictDecoding())
+		}
+		if conf.WithSubject != "" {
+			opts = append(opts, jwt.WithSubject(conf.WithSubject))
+		}
+		if len(conf.WithValidMethods) > 0 {
+			opts = append(opts, jwt.WithValidMethods(conf.WithValidMethods))
+		}
+
 		decodedJWT, err := jwt.Parse(jwtRaw, func(token *jwt.Token) (interface{}, error) {
+			// TODO: verify token alge here https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-Parse-Hmac
+			// TODO: somehow []byte("AllYourBase") represents a dummy public key to verify the signature
 			return []byte("AllYourBase"), nil
-		})
+		}, opts...)
 		switch {
 		case decodedJWT == nil:
 			eslog.Fatal("Couldn't handle this token:", err)
