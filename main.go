@@ -78,7 +78,7 @@ Examples:
   pbpaste | jotty -f -
   jotty -f test/jwt.txt
   jotty <jwt token data>
-  pbpaste | jotty -f - --no-header=false --no-signature
+  pbpaste | jotty -f - --no-header --no-signature
 
 Flags:`)
 
