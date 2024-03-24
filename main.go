@@ -95,7 +95,7 @@ Flags:`)
 func main() {
 	if conf.Version {
 		fmt.Printf("jotty version: %s\n", version)
-	} else if conf.Help || conf.File == "" {
+	} else if conf.Help {
 		flag.Usage()
 	} else {
 		var jwtRaw string
