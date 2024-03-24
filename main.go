@@ -107,6 +107,8 @@ func main() {
 			parsedArgs := parseArgs()
 			if len(parsedArgs) == 1 {
 				jwtRaw = parsedArgs[0]
+			} else if len(parsedArgs) == 0 {
+				eslog.Fatal("You must provide at least one argument!")
 			} else {
 				eslog.Fatal("Only one argument is supported! Got", len(parsedArgs), parsedArgs)
 			}
