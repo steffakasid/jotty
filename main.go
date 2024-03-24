@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mattn/go-colorable"
@@ -17,48 +16,52 @@ import (
 
 const version = "0.1-development"
 
-type config struct {
-	File                   string
-	Header                 bool
-	Payload                bool
-	Signature              bool
-	Version                bool
-	Help                   bool
-	Loglevel               string
-	WithAudience           string        `mapstructure:"with-audience"`
-	WithExpirationRequired bool          `mapstructure:"with-expiration"`
-	WithIssuedAt           bool          `mapstructure:"with-issued-at"`
-	WithIssuer             string        `mapstructure:"with-issuer"`
-	WithJsonNumber         bool          `mapstructure:"with-json-number"`
-	WithLeeway             time.Duration `mapstructure:"with-leeway"`
-	WithPaddingAllowed     bool          `mapstructure:"with-padding-allowed"`
-	WithStrictDecoding     bool          `mapstructure:"with-strict-decodinf"`
-	WithSubject            string        `mapstructure:"with-subject"`
-	WithValidMethods       []string      `mapstructure:"with-valid-methods"`
-}
+var conf = &internal.JottyConfig{}
 
-var conf = &config{}
+const (
+	fileFlag        = "file"
+	noHeaderFlag    = "no-header"
+	noPayloadFlag   = "no-payload"
+	noSignatureFlag = "no-signature"
+	versionFlag     = "version"
+	helpFlag        = "help"
+
+	withAudienceFlag           = "with-audience"
+	withExpirationRequiredFlag = "with-expiration"
+	withIssuedAtFlag           = "with-issued-at"
+	withIssuerFlag             = "with-issuer"
+	withJSONNumberFlag         = "with-json-number"
+	withLeewayFlag             = "with-leeway"
+	withPaddingAllowedFlag     = "with-padding-allowed"
+	withStrictDecodingFlag     = "with-strict-decoding"
+	withSubjectFlag            = "with-subject"
+	withValidMethodFlag        = "with-valid-methods"
+
+	keyFileFlag = "key-file"
+)
 
 func init() {
 	eslog.Logger.SetOutput(os.Stderr)
 
-	flag.StringP("file", "f", "", "--file=<filename> read token from file or - from stdin")
-	flag.BoolP("header", "h", true, "--header=false don't print the header of the JWT")
-	flag.BoolP("payload", "p", true, "--payload=false don't print the payload of the JWT")
-	flag.BoolP("signature", "s", true, "--signature=false don't print the signature of the JWT")
-	flag.BoolP("version", "v", false, "--version print version information")
-	flag.BoolP("help", "?", false, "--help print usage information")
+	flag.StringP(fileFlag, "f", "", "Read token from  given file or if '-' from stdin.")
+	flag.BoolP(noHeaderFlag, "h", false, "Don't print the header of the JWT.")
+	flag.BoolP(noPayloadFlag, "p", false, "Don't print the payload of the JWT.")
+	flag.BoolP(noSignatureFlag, "s", false, "Don't print the signature of the JWT.")
+	flag.BoolP(versionFlag, "v", false, "Print version information.")
+	flag.BoolP(helpFlag, "?", false, "Print usage information.")
 
-	flag.String("with-audience", "", "Configures the validator to require the specified audience in the `aud` claim.")
-	flag.Bool("with-expiration", false, "This makes the exp claim required. By default exp claim is optional.")
-	flag.Bool("with-issued-at", false, "Enables verification of issued-at.")
-	flag.String("with-issuer", "", "Require the specified issuer in the `iss` claim. Validation will fail if a different issuer is specified")
-	flag.Bool("with-json-number", false, "Configures the underlying JSON parser with UseNumber.")
-	flag.Duration("with-leeway", 0, "Specify the leeway window as duration e.g. 5s.")
-	flag.Bool("with-padding-allowed", false, "Enable the codec used for decoding JWTs to allow padding. Note that the JWS RFC7515 states that the tokens will utilize a Base64url encoding with no padding.")
-	flag.Bool("with-strict-decodinf", false, "Switch the codec used for decoding JWTs into strict mode. In this mode, the decoder requires that trailing padding bits are zero, as described in RFC 4648 section 3.5.")
-	flag.String("with-subject", "", "Configures the validator to require the specified subject in the `sub` claim.")
-	flag.StringArray("with-valid-methods", []string{}, "Supply algorithm methods that the parser will check.")
+	flag.String(withAudienceFlag, "", "Configures the validator to require the specified audience in the `aud` claim.")
+	flag.Bool(withExpirationRequiredFlag, false, "This makes the exp claim required. By default exp claim is optional.")
+	flag.Bool(withIssuedAtFlag, false, "Enables verification of issued-at.")
+	flag.String(withIssuerFlag, "", "Require the specified issuer in the `iss` claim. Validation will fail if a different issuer is specified")
+	flag.Bool(withJSONNumberFlag, false, "Configures the underlying JSON parser with UseNumber.")
+	flag.Duration(withLeewayFlag, 0, "Specify the leeway window as duration e.g. 5s.")
+	flag.Bool(withPaddingAllowedFlag, false, "Enable the codec used for decoding JWTs to allow padding. Note that the JWS RFC7515 states that the tokens will utilize a Base64url encoding with no padding.")
+	flag.Bool(withStrictDecodingFlag, false, "Switch the codec used for decoding JWTs into strict mode. In this mode, the decoder requires that trailing padding bits are zero, as described in RFC 4648 section 3.5.")
+	flag.String(withSubjectFlag, "", "Configures the validator to require the specified subject in the `sub` claim.")
+	flag.StringArray(withValidMethodFlag, []string{}, "Supply algorithm methods that the parser will check.")
+
+	flag.StringP(keyFileFlag, "k", "", "Provide the path to a PEM file containing the Key used to sign the JWT.")
 
 	flag.Usage = func() {
 		w := os.Stderr
@@ -75,7 +78,7 @@ Examples:
   pbpaste | jotty -f -
   jotty -f test/jwt.txt
   jotty <jwt token data>
-  pbpaste | jotty -f - --header=false --signature=false
+  pbpaste | jotty -f - --no-header=false --no-signature
 
 Flags:`)
 
@@ -92,10 +95,9 @@ Flags:`)
 func main() {
 	if conf.Version {
 		fmt.Printf("jotty version: %s\n", version)
-	} else if conf.Help {
+	} else if conf.Help || conf.File == "" {
 		flag.Usage()
 	} else {
-		// TODO: do all this in a own file
 		var jwtRaw string
 		if len(conf.File) > 0 {
 			jwtBt, err := internal.ReadData(conf.File)
@@ -110,43 +112,13 @@ func main() {
 			}
 		}
 
-		opts := []jwt.ParserOption{}
-
-		if conf.WithAudience != "" {
-			opts = append(opts, jwt.WithAudience(conf.WithAudience))
-		}
-		if conf.WithExpirationRequired {
-			opts = append(opts, jwt.WithExpirationRequired())
-		}
-		if conf.WithIssuedAt {
-			opts = append(opts, jwt.WithIssuedAt())
-		}
-		if conf.WithIssuer != "" {
-			opts = append(opts, jwt.WithIssuer(conf.WithIssuer))
-		}
-		if conf.WithJsonNumber {
-			opts = append(opts, jwt.WithJSONNumber())
-		}
-		if conf.WithLeeway > 0 {
-			opts = append(opts, jwt.WithLeeway(conf.WithLeeway))
-		}
-		if conf.WithPaddingAllowed {
-			opts = append(opts, jwt.WithPaddingAllowed())
-		}
-		if conf.WithStrictDecoding {
-			opts = append(opts, jwt.WithStrictDecoding())
-		}
-		if conf.WithSubject != "" {
-			opts = append(opts, jwt.WithSubject(conf.WithSubject))
-		}
-		if len(conf.WithValidMethods) > 0 {
-			opts = append(opts, jwt.WithValidMethods(conf.WithValidMethods))
-		}
+		opts := conf.GetParserOptions()
+		signingKey, err := conf.GetPublicKey()
+		eslog.LogIfError(err, eslog.Fatal)
 
 		decodedJWT, err := jwt.Parse(jwtRaw, func(token *jwt.Token) (interface{}, error) {
 			// TODO: verify token alge here https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-Parse-Hmac
-			// TODO: somehow []byte("AllYourBase") represents a dummy public key to verify the signature
-			return []byte("AllYourBase"), nil
+			return signingKey, nil
 		}, opts...)
 		switch {
 		case decodedJWT == nil:
@@ -157,15 +129,15 @@ func main() {
 			eslog.Error("Error parsing the JWT:", err)
 		}
 
-		if conf.Header {
+		if !conf.NoHeader {
 			colorfulJsonEncode(decodedJWT.Header)
 		}
 
-		if conf.Payload {
+		if !conf.NoPayload {
 			colorfulJsonEncode(decodedJWT.Claims)
 		}
 
-		if conf.Signature {
+		if !conf.NoSignature {
 			fmt.Println("JWT Signature:")
 			fmt.Println(decodedJWT.Signature)
 		}
