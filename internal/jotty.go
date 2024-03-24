@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type JottyConfig struct {
+type Config struct {
 	File                   string        `mapstructure:"file"`
 	NoHeader               bool          `mapstructure:"no-header"`
 	NoPayload              bool          `mapstructure:"no-payload"`
@@ -28,7 +28,7 @@ type JottyConfig struct {
 	SigningKey             string        `mapstructure:"key-file"`
 }
 
-func (conf JottyConfig) GetParserOptions() (opts []jwt.ParserOption) {
+func (conf Config) GetParserOptions() (opts []jwt.ParserOption) {
 	opts = []jwt.ParserOption{}
 
 	if conf.WithAudience != "" {
@@ -65,7 +65,7 @@ func (conf JottyConfig) GetParserOptions() (opts []jwt.ParserOption) {
 	return opts
 }
 
-func (conf JottyConfig) GetPublicKey() (key []byte, err error) {
+func (conf Config) GetPublicKey() (key []byte, err error) {
 	if conf.SigningKey != "" {
 		return os.ReadFile(conf.SigningKey)
 	}

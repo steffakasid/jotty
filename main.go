@@ -12,11 +12,12 @@ import (
 	"github.com/spf13/viper"
 	"github.com/steffakasid/eslog"
 	"github.com/steffakasid/jotty/internal"
+	jotty "github.com/steffakasid/jotty/internal"
 )
 
 const version = "0.1-development"
 
-var conf = &internal.JottyConfig{}
+var conf = &jotty.Config{}
 
 const (
 	fileFlag        = "file"
