@@ -8,7 +8,7 @@ require (
 	github.com/neilotoole/jsoncolor v0.7.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
-	github.com/steffakasid/eslog v0.3.2
+	github.com/steffakasid/eslog v0.3.3
 	github.com/stretchr/testify v1.9.0
 )
 
