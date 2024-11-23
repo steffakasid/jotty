@@ -23,7 +23,7 @@ changelog:
 # .goreleaser.yaml
 brews:
   - # GitHub/GitLab repository to push the formula to
-    tap:
+    repository:
       owner: steffakasid
       name: homebrew-jotty
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
@@ -37,8 +37,8 @@ brews:
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
 
     # Folder inside the repository to put the formula.
-    # Default is the root folder.
-    folder: Formula
+    # Default is the root directory.
+    directory: Formula
 
     homepage: "https://github.com/steffakasid/trivy-project-scanner"
     description: "This tool to decode jwt tokens and print out the JSON"
