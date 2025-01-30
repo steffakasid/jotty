@@ -6,7 +6,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/mattn/go-colorable v0.1.14
 	github.com/neilotoole/jsoncolor v0.7.1
-	github.com/spf13/pflag v1.0.5
+	github.com/spf13/pflag v1.0.6
 	github.com/spf13/viper v1.19.0
 	github.com/steffakasid/eslog v0.3.3
 	github.com/stretchr/testify v1.10.0
