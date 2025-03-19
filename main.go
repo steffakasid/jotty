@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mattn/go-colorable"
@@ -22,13 +21,13 @@ var conf = &jotty.Config{}
 func init() {
 	eslog.Logger.SetOutput(os.Stderr)
 
-	pflag.StringP(flags.File, "f", "", "Read token from  given file or if '-' from stdin.")
+	// Define flags
+	pflag.StringP(flags.File, "f", "", "Read token from given file or if '-' from stdin.")
 	pflag.BoolP(flags.NoHeader, "h", false, "Don't print the header of the JWT.")
 	pflag.BoolP(flags.NoPayload, "p", false, "Don't print the payload of the JWT.")
 	pflag.BoolP(flags.NoSignature, "s", false, "Don't print the signature of the JWT.")
 	pflag.BoolP(flags.Version, "v", false, "Print version information.")
 	pflag.BoolP(flags.Help, "?", false, "Print usage information.")
-
 	pflag.String(flags.WithAudience, "", "Configures the validator to require the specified audience in the `aud` claim.")
 	pflag.Bool(flags.WithExpirationRequired, false, "This makes the exp claim required. By default exp claim is optional.")
 	pflag.Bool(flags.WithIssuedAt, false, "Enables verification of issued-at.")
@@ -39,12 +38,11 @@ func init() {
 	pflag.Bool(flags.WithStrictDecoding, false, "Switch the codec used for decoding JWTs into strict mode. In this mode, the decoder requires that trailing padding bits are zero, as described in RFC 4648 section 3.5.")
 	pflag.String(flags.WithSubject, "", "Configures the validator to require the specified subject in the `sub` claim.")
 	pflag.StringArray(flags.WithValidMethod, []string{}, "Supply algorithm methods that the parser will check.")
-
 	pflag.StringP(flags.KeyFile, "k", "", "Provide the path to a PEM file containing the Key used to sign the JWT. Otherwise signature can't be verified and will not be printed.")
 
+	// Define usage
 	pflag.Usage = func() {
 		w := os.Stderr
-
 		fmt.Fprintf(w, "Usage of %s: \n", os.Args[0])
 		fmt.Fprintln(w, `
 This tool allows to decrypt JSON Web Tokens called JWT (pronounced as jot). 
@@ -57,13 +55,11 @@ Examples:
   pbpaste | jotty -f -
   jotty -f test/jwt.txt
   jotty <jwt token data>
-  pbpaste | jotty -f - --no-header --no-signature
-
-s:`)
-
+  pbpaste | jotty -f - --no-header --no-signature`)
 		pflag.PrintDefaults()
 	}
 
+	// Parse flags and bind to viper
 	pflag.Parse()
 	err := viper.BindPFlags(pflag.CommandLine)
 	eslog.LogIfError(err, eslog.Fatal)
@@ -86,14 +82,7 @@ func main() {
 			eslog.LogIfError(err, eslog.Error)
 			jwtRaw = string(jwtBt)
 		} else {
-			parsedArgs := parseArgs()
-			if len(parsedArgs) == 1 {
-				jwtRaw = parsedArgs[0]
-			} else if len(parsedArgs) == 0 {
-				eslog.Fatal("You must provide at least one argument!")
-			} else {
-				eslog.Fatal("Only one argument is supported! Got", len(parsedArgs), parsedArgs)
-			}
+			eslog.Fatal(fmt.Sprintf("No JWT token provided. At least --%s must be provided.", flags.File))
 		}
 
 		opts := conf.GetParserOptions()
@@ -136,16 +125,15 @@ func main() {
 
 func CheckError(err error, loggerFunc func(format string, args ...interface{})) (wasError bool) {
 	wasError = false
-
 	if err != nil {
 		loggerFunc("%s\n", err)
+		wasError = true
 	}
 	return wasError
 }
 
 func colorfulJsonEncode(data any) {
 	var enc *jsoncolor.Encoder
-
 	if jsoncolor.IsColorTerminal(os.Stdout) {
 		out := colorable.NewColorable(os.Stdout) // needed for Windows
 		enc = jsoncolor.NewEncoder(out)
@@ -154,20 +142,8 @@ func colorfulJsonEncode(data any) {
 	} else {
 		enc = jsoncolor.NewEncoder(os.Stdout)
 	}
-
 	enc.SetIndent("", "  ")
-
 	if err := enc.Encode(data); err != nil {
 		eslog.Error(err)
 	}
-}
-
-func parseArgs() []string {
-	parsedArgs := []string{}
-	for i, arg := range os.Args {
-		if i != 0 && !strings.HasSuffix(arg, "-") {
-			parsedArgs = append(parsedArgs, arg)
-		}
-	}
-	return parsedArgs
 }
